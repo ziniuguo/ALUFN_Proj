@@ -1,0 +1,19 @@
+module shifter_unit (
+    input a[16],
+    input b[16],
+    input alufn_signal[6],
+    output result[16]
+  ) {
+  
+  // Slice 4 bits of b (b[3:0]) to shift a by maximum of 2^4 bits
+  // alufn_signal must consider all 6 bits as shift operation
+  
+  always {
+  case (alufn_signal) {
+    b100000: result = a << b[3:0];           // Shift left
+    b100001: result = a >> b[3:0];           // Shift right
+    b100011: result = $signed(a) >>> b[3:0]; // Signed shift right
+    default: result = a;
+    }
+  }
+}

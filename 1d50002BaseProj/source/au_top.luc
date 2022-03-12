@@ -1,0 +1,55 @@
+module au_top (
+    input clk,              // 100MHz clock
+    input rst_n,            // reset button (active low)
+    output led [8],         // 8 user controllable LEDs
+    input usb_rx,           // USB->Serial input
+    output usb_tx,          // USB->Serial output
+    input io_button [5],    // 5 buttons on IO Shield
+    input io_dip [3][8],     // DIP switches on IO Shield
+    output io_led [3][8],
+    output io_sel [4],
+    output io_seg [8]
+    
+  ) {
+  
+  sig rst;                  // reset signal
+  // counter slowclock(#SIZE(1),#DIV(26),.clk(clk),.rst(rst));
+  button_conditioner buttoncond(.clk(clk));
+  edge_detector buttondetector(#RISE(1), #FALL(0), .clk(clk));
+  tester test;
+  .clk(clk) {
+    // The reset conditioner is used to synchronize the reset signal to the FPGA
+    // clock. This ensures the entire FPGA comes out of reset at the same time.
+    reset_conditioner reset_cond;
+    
+  }
+  
+  always {
+    reset_cond.in = ~rst_n; // input raw inverted reset signal
+    rst = reset_cond.out;   // conditioned reset
+    usb_tx = usb_rx;        // loop serial port
+      
+    // Configure button here
+    buttoncond.in = io_button[0];
+    buttondetector.in = buttoncond.out; 
+    
+     
+    // Please remain unchanged:
+    io_led = 3x{{8h00}};
+    io_seg=8hff;
+    io_sel=4hf;
+    led = 8h00;
+    
+    test.rst = rst;
+    test.clk = clk;
+    test.btn = buttondetector.out;
+    
+    // LED show ZVN
+    io_led = test.io_led;
+    
+    // LED show button situation
+    io_led[0][1] = buttoncond.out;
+    io_led[0][2] = io_button[0];
+    // io_led[0][3] = buttondetector.out;
+  }
+}

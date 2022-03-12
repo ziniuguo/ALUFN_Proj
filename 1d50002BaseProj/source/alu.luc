@@ -1,0 +1,47 @@
+module alu (
+    input a[16],
+    input b[16],
+    input aluin[6],
+    output zvn[3],
+    output result[16]
+  ) {
+  adder_unit adderUnit;
+  compare_unit compareUnit;
+  boolean_unit booleanUnit;
+  shifter_unit shifterUnit;
+  
+  always {
+    adderUnit.alufn_signal = aluin;
+    adderUnit.a = a;
+    adderUnit.b = b;
+    
+    zvn[2] = adderUnit.z;
+    zvn[1] = adderUnit.v;
+    zvn[0] = adderUnit.n;
+    
+    compareUnit.signal = aluin;
+    compareUnit.z = adderUnit.z;
+    compareUnit.v = adderUnit.v;
+    compareUnit.n = adderUnit.n;
+    
+    booleanUnit.a = a;
+    booleanUnit.b = b;
+    booleanUnit.alufn = aluin;
+    
+    shifterUnit.a = a;
+    shifterUnit.b = b;
+    shifterUnit.alufn_signal = aluin;
+    
+    case(aluin[5:4]) {
+      b00 : result = adderUnit.out;
+      b01 : result = booleanUnit.out;
+      b10 : result = shifterUnit.result;
+      b11 : result = compareUnit.cout;
+      default: result = 16b0;
+      }
+    
+    if (aluin == b000010){
+      result = a*b; // fast multiplier hack, https://github.com/natalieagus/SampleAlchitryProjects/blob/master/BetaComponents/source/alu.luc
+    }
+  }
+}

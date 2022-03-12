@@ -1,0 +1,20 @@
+module boolean_unit (
+    // Define the inputs and outputs
+    input a[16],
+    input b[16],
+    input alufn[6],
+    output out[16]
+  ) {
+  always {
+    //When alufn is [3:0]
+    case(alufn[3:0]){
+      // Boolean function
+      b1000: out = a & b;
+      b1110: out = a | b;
+      b0110: out = a ^ b;
+      b1010: out = a;
+      default:
+        out = 16b0;
+    }
+  }
+}
